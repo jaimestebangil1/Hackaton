@@ -23,6 +23,10 @@ class ChatRequest(BaseModel):
     message: str
     context_accounts: List[int] = []
 
+class DetailsRequest(BaseModel):
+    account_ids: List[int]
+    category_name: str
+
 @app.get("/")
 async def root():
     return {"status": "ok", "message": "Odoo-IA-Analytic-Assistant is running"}
@@ -42,6 +46,13 @@ async def get_accounts():
 @app.post("/api/analysis/compare")
 async def compare_costs(req: ComparisonRequest):
     return logic.compare_costs(req.account_ids)
+
+@app.post("/api/analysis/details")
+async def get_details(req: DetailsRequest):
+    """Fetch raw raw analytic lines that make up a logical category."""
+    lines = logic.get_category_lines(req.account_ids, req.category_name)
+    # Format dates and ensure safe serialization
+    return {"lines": lines}
 
 @app.post("/api/chat")
 async def chat_interaction(req: ChatRequest):
@@ -66,26 +77,29 @@ async def chat_interaction(req: ChatRequest):
             filtered_data = {}
 
             # Identify keywords in message to filter products
-            # We use words with more than 3 characters
-            keywords = [w for w in msg.split() if len(w) > 3 and w not in ["compara", "diferencia", "costo", "cuenta"]]
+            # We use words with more than 3 characters, excluding common command words
+            ignore_words = ["compara", "diferencia", "costo", "cuenta", "sobre", "solo", "solamente", "muéstrame", "muesltra", "trae", "producto", "especifico", "específico"]
+            keywords = [w.lower() for w in msg.split() if len(w) > 3 and w.lower() not in ignore_words]
 
             for account, costs in data.items():
-                total = sum(costs.values())
-                summary_parts.append(f"- **{account}**: Total de {total:,.2f} COP")
-                
                 filtered_account_costs = {}
                 for item, amt in costs.items():
-                    # Filter: if empty keywords or item matches any keyword
+                    # Strict Filter: item matches any keyword
                     if not keywords or any(k in item.lower() for k in keywords):
                         filtered_account_costs[item] = amt
-                    
-                    all_items_summary[item] = all_items_summary.get(item, 0) + abs(amt)
+                        all_items_summary[item] = all_items_summary.get(item, 0) + abs(amt)
                 
-                # If everything was filtered out, maybe show the top 5 for context
-                if keywords and not filtered_account_costs:
-                     # Sort by absolute amount descending
+                # If keywords were provided and we found nothing, we don't fallback to top 5 
+                # if the user was being specific. Only fallback if no keywords at all.
+                if not keywords and not filtered_account_costs:
                      top_items = sorted(costs.items(), key=lambda x: abs(x[1]), reverse=True)[:5]
                      filtered_account_costs = dict(top_items)
+                     for item, amt in filtered_account_costs.items():
+                         all_items_summary[item] = all_items_summary.get(item, 0) + abs(amt)
+
+                filtered_total = sum(filtered_account_costs.values())
+                if filtered_account_costs:
+                    summary_parts.append(f"- **{account}**: Total filtrado {filtered_total:,.2f} COP")
 
                 filtered_data[account] = filtered_account_costs
             

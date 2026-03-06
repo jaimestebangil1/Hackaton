@@ -4,34 +4,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Odoo IA Analytic Assistant</title>
+    <title>SaveThePesos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg: #0f172a;
-            --glass: rgba(30, 41, 59, 0.7);
-            --accent: #38bdf8;
-            --accent-glow: rgba(56, 189, 248, 0.3);
-            --text: #f8fafc;
-            --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
+            --bg: #f8fafc;
+            --glass: #ffffff;
+            --accent: #14b8a6;
+            /* cyan theme */
+            --accent-glow: rgba(20, 184, 166, 0.3);
+            --text: #0f172a;
+            --text-dim: #64748b;
+            --border: #e2e8f0;
+            --bg-hover: #f1f5f9;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            background-image: radial-gradient(circle at 20% 20%, #1e293b 0%, transparent 40%),
-                radial-gradient(circle at 80% 80%, #0f172a 0%, transparent 40%);
+            background-color: var(--bg);
             color: var(--text);
             height: 100vh;
             display: flex;
@@ -42,7 +43,6 @@
         aside {
             width: 320px;
             background: var(--glass);
-            backdrop-filter: blur(12px);
             border-right: 1px solid var(--border);
             padding: 2rem;
             display: flex;
@@ -55,9 +55,7 @@
             font-family: 'Outfit', sans-serif;
             font-size: 1.5rem;
             font-weight: 700;
-            background: linear-gradient(90deg, #fff, var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text);
             margin-bottom: 1rem;
         }
 
@@ -78,13 +76,14 @@
 
         input.search-input {
             width: 100%;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 0.6rem;
-            color: #fff;
+            color: var(--text);
             font-size: 0.85rem;
             outline: none;
+            transition: border-color 0.2s;
         }
 
         input.search-input:focus {
@@ -117,7 +116,7 @@
         .btn-update {
             width: 100%;
             background: var(--accent);
-            color: #000;
+            color: white;
             border: none;
             border-radius: 8px;
             padding: 0.8rem;
@@ -134,7 +133,8 @@
 
         .btn-update:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 255, 170, 0.4);
+            background: #0d9488;
+            box-shadow: 0 4px 15px var(--accent-glow);
         }
 
         .btn-update:active {
@@ -151,22 +151,24 @@
 
         .account-item {
             padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid transparent;
+            background: var(--bg);
+            border: 1px solid var(--border);
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            color: var(--text);
         }
 
         .account-item:hover {
             border-color: var(--accent);
-            background: rgba(56, 189, 248, 0.1);
+            background: var(--bg-hover);
         }
 
         .account-item.selected {
             background: var(--accent);
-            color: #000;
+            color: white;
+            border-color: var(--accent);
             font-weight: 600;
         }
 
@@ -176,6 +178,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            background: var(--bg);
         }
 
         #chat-window {
@@ -188,11 +191,14 @@
         }
 
         .message {
-            max-width: 80%;
+            max-width: 95%;
+            /* Increased from 80% to show more data */
             padding: 1rem 1.5rem;
             border-radius: 12px;
             line-height: 1.5;
             animation: slideIn 0.3s ease-out;
+            font-size: 0.95rem;
+            width: fit-content;
         }
 
         @keyframes slideIn {
@@ -211,93 +217,110 @@
             align-self: flex-start;
             background: var(--glass);
             border: 1px solid var(--border);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-bottom-left-radius: 4px;
+            width: 100%;
+            /* Allow bot messages with data to take more space */
+            max-width: 98%;
         }
 
         .message.user {
             align-self: flex-end;
             background: var(--accent);
-            color: #000;
+            color: white;
             font-weight: 500;
+            border-bottom-right-radius: 4px;
+            max-width: 80%;
+            /* Keep user messages compact */
         }
 
         .input-area {
-            padding: 2rem;
-            background: linear-gradient(transparent, var(--bg));
+            padding: 1.5rem 2rem;
+            background: var(--glass);
+            border-top: 1px solid var(--border);
         }
 
         .input-container {
             max-width: 800px;
             margin: 0 auto;
             position: relative;
-            background: var(--glass);
+            background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 0.5rem;
             display: flex;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        input {
+        input.chat-input {
             flex: 1;
             background: transparent;
             border: none;
-            color: #fff;
-            padding: 1rem;
-            font-size: 1rem;
+            color: var(--text);
+            padding: 1rem 1.5rem;
+            font-size: 0.95rem;
             outline: none;
+            border-radius: 16px 0 0 16px;
+        }
+
+        input.chat-input:focus {
+            box-shadow: inset 0 0 0 1px var(--accent);
         }
 
         button#send {
             background: var(--accent);
             border: none;
-            border-radius: 12px;
-            padding: 0.8rem 1.5rem;
-            color: #000;
-            font-weight: 700;
+            border-radius: 0 16px 16px 0;
+            padding: 0 2rem;
+            color: white;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: background-color 0.2s;
         }
 
         button#send:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px var(--accent-glow);
+            background: #0d9488;
         }
 
         /* Glass Cards for Data */
         .data-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--glass);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 1rem;
+            /* Reduced from 1.5rem */
             margin-top: 1rem;
             font-size: 0.85rem;
-            color: var(--accent);
             overflow-x: auto;
+            width: 100%;
         }
 
         .cost-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 0.5rem;
+            min-width: 800px;
+            /* Ensure it doesn't get too squashed horizontally */
         }
 
         .cost-table th {
             text-align: left;
             padding: 8px;
+            /* Reduced from 10px */
             border-bottom: 2px solid var(--border);
             color: var(--text-dim);
             font-size: 0.75rem;
             text-transform: uppercase;
+            white-space: nowrap;
         }
 
         .cost-table td {
-            padding: 10px 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 6px 8px;
+            /* Reduced from 10px */
+            border-bottom: 1px solid var(--border);
             color: var(--text);
         }
 
-        .cost-table tr:hover {
-            background: rgba(255, 255, 255, 0.02);
+        .cost-table tr:hover td {
+            background: var(--bg-hover);
         }
 
         .amount-cell {
@@ -306,17 +329,188 @@
             font-weight: 600;
         }
 
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: monospace;
+        .clickable-product {
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: underline;
+            text-decoration-color: transparent;
+            transition: all 0.2s;
+        }
+
+        .clickable-product:hover {
+            color: #0d9488;
+            text-decoration-color: #0d9488;
+        }
+
+        /* Modal classes */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--glass);
+            width: 80%;
+            max-width: 900px;
+            max-height: 80vh;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            transform: translateY(20px);
+            transition: transform 0.2s;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-dim);
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .raw-table th {
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+        }
+
+        .raw-table td {
+            font-size: 0.85rem;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(20, 184, 166, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Chart Controls */
+        .chart-controls {
+            padding: 1rem 2rem;
+            background: var(--glass);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .chart-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        .chart-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .chart-container-wrapper {
+            padding: 1.5rem 2rem;
+            background: var(--glass);
+            border-top: 1px solid var(--border);
+            max-height: 400px;
+            display: none;
+        }
+
+        .chart-container-wrapper.active {
+            display: block;
+        }
+
+        #chart-canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+
+        .product-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--accent);
         }
     </style>
 </head>
 
 <body>
     <aside>
-        <h1>Odoo AI analytic</h1>
+        <h1>SaveThePesos</h1>
         <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
             <p class="section-title">
                 Cuentas Analíticas
@@ -343,19 +537,48 @@
     <main>
         <div id="chat-window">
             <div class="message bot">
-                ¡Hola! Soy tu asistente de análisis de Odoo. Selecciona cuentas analíticas a la izquierda y pregúntame
-                para comparar sus costos normalizados.
+                ¡Hola! He vuelto a mi antigua forma pero conservando mis nuevos colores.
+                Selecciona cuentas analíticas a la izquierda y pregúntame para comparar sus costos.<br><br>
+                <i>Tip: Da click en el nombre de los productos en las tablas para ver las líneas de detalle exactas.</i>
             </div>
+        </div>
+
+        <div class="chart-controls" id="chart-controls" style="display: none;">
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-dim);">Visualizar seleccionados:</span>
+            <button class="chart-btn active" onclick="setChartType('bar')">📊 Barras</button>
+            <button class="chart-btn" onclick="setChartType('line')">📈 Líneas</button>
+            <button class="chart-btn" onclick="setChartType('pie')">🍕 Torta</button>
+            <div style="flex: 1;"></div>
+            <button class="chart-btn" onclick="clearSelection()" style="color: #ef4444; border-color: #fee2e2;">Limpiar
+                Selección</button>
+        </div>
+
+        <div class="chart-container-wrapper" id="chart-wrapper">
+            <canvas id="chart-canvas"></canvas>
         </div>
 
         <div class="input-area">
             <div class="input-container">
-                <input type="text" id="user-input" placeholder="Pregunta algo sobre los costos..."
+                <input type="text" id="user-input" class="chat-input" placeholder="Pregunta algo sobre los costos..."
                     onkeydown="if(event.key==='Enter') sendMessage()">
                 <button id="send" onclick="sendMessage()">Enviar</button>
             </div>
         </div>
     </main>
+
+    <!-- Modal for Line Details -->
+    <div class="modal-overlay" id="details-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Detalle de Costos</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
 
     <script>
         let allAccounts = [];
@@ -401,6 +624,113 @@
             const count = selectedAccounts.length;
             document.getElementById('selected-count').innerText = count;
             document.getElementById('btn-update').disabled = count === 0;
+        }
+
+        // Action when a product is clicked for details
+        async function fetchDetails(categoryName) {
+            const modal = document.getElementById('details-modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+
+            modal.classList.add('active');
+            title.innerText = `Detalle de Líneas: ${categoryName}`;
+            body.innerHTML = `<div style="text-align: center; padding: 2rem;"><span class="loader"></span></div>`;
+
+            try {
+                const resp = await fetch('/api/analysis/details', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ account_ids: selectedAccounts, category_name: categoryName })
+                });
+
+                if (!resp.ok) throw new Error("Could not fetch details.");
+                const data = await resp.json();
+                const lines = data.lines || [];
+
+                if (lines.length === 0) {
+                    body.innerHTML = `<p style="color: var(--text-dim); text-align: center;">No hay líneas de detalle para ${categoryName}</p>`;
+                    return;
+                }
+
+                // Group by MGS (account_id)
+                const grouped = {};
+                lines.forEach(line => {
+                    const accountName = line.account_id ? line.account_id[1] : 'Sin Cuenta Analítica';
+                    if (!grouped[accountName]) grouped[accountName] = [];
+                    grouped[accountName].push(line);
+                });
+
+                let html = '';
+                let grandTotal = 0;
+
+                for (const [account, accountLines] of Object.entries(grouped)) {
+                    html += `<h3 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--accent); font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem;">📌 ${account}</h3>`;
+
+                    html += `<table class="cost-table raw-table" style="margin-bottom: 1.5rem;">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Factura / Ref</th>
+                                <th>Asociado (Proveedor)</th>
+                                <th>Descripción</th>
+                                <th>Producto Entidad</th>
+                                <th style="text-align: right;">Cantidad</th>
+                                <th style="text-align: right;">Valor COP</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                    let accountTotal = 0;
+                    accountLines.forEach(line => {
+                        const date = line.date || '-';
+                        let invoice = line.ref || '-';
+                        if (line.move_line_id) invoice = line.move_line_id[1].split(' ')[0] || invoice;
+
+                        const partnerName = line.partner_id ? line.partner_id[1] : '-';
+                        const desc = line.name || '-';
+                        const prodName = line.product_id ? line.product_id[1] : 'Ninguno';
+                        const qty = line.unit_amount || 0;
+                        const amt = line.amount || 0;
+
+                        accountTotal += amt;
+                        grandTotal += amt;
+
+                        html += `<tr>
+                            <td>${date}</td>
+                            <td style="color: var(--accent); font-weight: 500;">${invoice}</td>
+                            <td style="color: var(--text-dim);">${partnerName}</td>
+                            <td>${desc}</td>
+                            <td style="color: var(--text-dim)">${prodName}</td>
+                            <td style="text-align: right;">${qty}</td>
+                            <td class="amount-cell">${amt.toLocaleString('es-CO', { minimumFractionDigits: 2 })}</td>
+                        </tr>`;
+                    });
+
+                    // Subtotal per account
+                    html += `<tr style="border-top: 2px solid var(--accent); font-weight: bold; background: var(--bg);">
+                        <td colspan="6">Subtotal ${account}</td>
+                        <td class="amount-cell">${accountTotal.toLocaleString('es-CO', { minimumFractionDigits: 2 })}</td>
+                    </tr>`;
+
+                    html += `</tbody></table>`;
+                }
+
+                // Grand Total
+                html += `<div style="text-align: right; margin-top: 1rem; padding: 1rem; background: var(--bg-hover); border-radius: 8px; border: 1px solid var(--border);">
+                    <span style="font-weight: bold; font-size: 1.2rem; margin-right: 1rem;">TOTAL GENERAL:</span>
+                    <span class="amount-cell" style="font-size: 1.3rem; color: var(--accent);">${grandTotal.toLocaleString('es-CO', { minimumFractionDigits: 2 })}</span>
+                </div>`;
+
+                body.innerHTML = html;
+
+            } catch (e) {
+                console.error(e);
+                body.innerHTML = `<p style="color: red; text-align: center;">Error obteniendo detalles.</p>`;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('details-modal').classList.remove('active');
         }
 
         async function updateComparison() {
@@ -455,100 +785,245 @@
             }
         }
 
+        let myChart = null;
+        let chartType = 'bar';
+        let currentDataCard = null; // Store data of last matrix
+        let currentAccounts = [];
+
+        function setChartType(type) {
+            chartType = type;
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                if (btn.innerText.toLowerCase().includes(type === 'bar' ? 'barras' : type === 'line' ? 'líneas' : 'torta')) {
+                    btn.classList.add('active');
+                } else if (!btn.innerText.includes('Limpiar')) {
+                    btn.classList.remove('active');
+                }
+            });
+            renderChart();
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+            handleSelectionChange();
+        }
+
+        function handleSelectionChange() {
+            const selected = Array.from(document.querySelectorAll('.product-checkbox:checked'))
+                .map(cb => cb.dataset.product);
+
+            const controls = document.getElementById('chart-controls');
+            const wrapper = document.getElementById('chart-wrapper');
+
+            if (selected.length > 0) {
+                controls.style.display = 'flex';
+                wrapper.classList.add('active');
+                renderChart();
+            } else {
+                controls.style.display = 'none';
+                wrapper.classList.remove('active');
+            }
+        }
+
+        function renderChart() {
+            const selectedProds = Array.from(document.querySelectorAll('.product-checkbox:checked'))
+                .map(cb => cb.dataset.product);
+
+            if (!currentDataCard || selectedProds.length === 0) return;
+
+            const canvas = document.getElementById('chart-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (myChart) myChart.destroy();
+
+            const datasets = [];
+            const colors = [
+                '#14b8a6', '#0ea5e9', '#6366f1', '#f59e0b', '#ef4444',
+                '#8b5cf6', '#ec4899', '#22c55e', '#f97316', '#06b6d4'
+            ];
+
+            if (chartType === 'pie') {
+                const pieData = selectedProds.map(p => {
+                    return currentAccounts.reduce((sum, acc) => sum + (currentDataCard[acc][p] || 0), 0);
+                });
+
+                datasets.push({
+                    data: pieData,
+                    backgroundColor: colors.slice(0, selectedProds.length),
+                    borderWidth: 1
+                });
+
+                myChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: { labels: selectedProds, datasets: datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right' }
+                        }
+                    }
+                });
+            } else {
+                selectedProds.forEach((prod, i) => {
+                    datasets.push({
+                        label: prod,
+                        data: currentAccounts.map(acc => currentDataCard[acc][prod] || 0),
+                        backgroundColor: colors[i % colors.length] + (chartType === 'bar' ? '80' : '20'),
+                        borderColor: colors[i % colors.length],
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: chartType === 'line'
+                    });
+                });
+
+                myChart = new Chart(ctx, {
+                    type: chartType,
+                    data: { labels: currentAccounts, datasets: datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: (val) => val.toLocaleString('es-CO')
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('es-CO')} COP`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
         function addMessage(text, type, data = null) {
             const win = document.getElementById('chat-window');
             const div = document.createElement('div');
             div.className = `message ${type}`;
             div.innerText = text;
+            win.appendChild(div);
 
             if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+                currentDataCard = data;
                 const card = document.createElement('div');
                 card.className = 'data-card';
 
                 const accounts = Object.keys(data);
+                currentAccounts = accounts;
                 let html = '';
 
                 if (accounts.length > 1) {
-                    // COMPARATIVE MATRIX VIEW
                     const allProductsSet = new Set();
                     accounts.forEach(acc => Object.keys(data[acc]).forEach(p => allProductsSet.add(p)));
                     const allProducts = Array.from(allProductsSet);
 
-                    // Sort products by total cost across all selected accounts
                     allProducts.sort((a, b) => {
                         const totalA = accounts.reduce((sum, acc) => sum + (data[acc][a] || 0), 0);
                         const totalB = accounts.reduce((sum, acc) => sum + (data[acc][b] || 0), 0);
-                        return totalB - totalA;
+                        return Math.abs(totalB) - Math.abs(totalA);
                     });
 
                     html += `<table class="cost-table">
                         <thead>
                             <tr>
+                                <th class="checkbox-cell"><input type="checkbox" onchange="const cbs=this.closest('table').querySelectorAll('.product-checkbox'); cbs.forEach(c=>c.checked=this.checked); handleSelectionChange()"></th>
                                 <th>Producto / Entidad</th>
                                 ${accounts.map(acc => `<th style="text-align: right;">${acc}</th>`).join('')}
+                                <th style="text-align: right;">Total</th>
                             </tr>
                         </thead>
                         <tbody>`;
 
+                    let accountsSum = {};
+                    accounts.forEach(a => accountsSum[a] = 0);
+                    let grandSum = 0;
+
                     allProducts.forEach(prod => {
+                        let rowTotal = 0;
+                        let nonZeroVals = accounts.map(a => data[a][prod] || 0).filter(v => v > 0);
+                        let maxVal = nonZeroVals.length > 0 ? Math.max(...nonZeroVals) : null;
+                        let minVal = nonZeroVals.length > 0 ? Math.min(...nonZeroVals) : null;
+
                         html += `<tr>
-                            <td>${prod}</td>
+                            <td class="checkbox-cell"><input type="checkbox" class="product-checkbox" data-product="${prod}" onchange="handleSelectionChange()"></td>
+                            <td><span class="clickable-product" onclick="fetchDetails('${prod}')">${prod}</span></td>
                             ${accounts.map(acc => {
                             const val = data[acc][prod] || 0;
-                            return `<td class="amount-cell">${val !== 0 ? val.toLocaleString('es-CO', { minimumFractionDigits: 2 }) : '-'}</td>`;
+                            rowTotal += val;
+                            accountsSum[acc] += val;
+
+                            let style = '';
+                            if (val > 0 && maxVal !== null && minVal !== null && maxVal !== minVal) {
+                                if (val === maxVal) style = 'background-color: #ffe6e6;';
+                                else if (val === minVal) style = 'background-color: #e6ffe6;';
+                            }
+
+                            return `<td class="amount-cell" style="${style}">${val !== 0 ? val.toLocaleString('es-CO', { minimumFractionDigits: 2 }) : '-'}</td>`;
                         }).join('')}
+                            <td class="amount-cell" style="font-weight: bold; background: var(--bg-hover);">${rowTotal !== 0 ? rowTotal.toLocaleString('es-CO', { minimumFractionDigits: 2 }) : '-'}</td>
                         </tr>`;
+                        grandSum += rowTotal;
                     });
 
-                    // Add Total Row
-                    html += `<tr style="border-top: 2px solid var(--accent); font-weight: bold; background: rgba(0,255,170,0.05);">
-                        <td>TOTAL GENERAL</td>
+                    html += `<tr style="border-top: 2px solid var(--accent); font-weight: bold; background: var(--bg-hover);">
+                        <td colspan="2">TOTAL GENERAL</td>
                         ${accounts.map(acc => {
-                        const total = Object.values(data[acc]).reduce((a, b) => a + b, 0);
-                        return `<td class="amount-cell">${total.toLocaleString('es-CO', { minimumFractionDigits: 2 })}</td>`;
+                        return `<td class="amount-cell">${accountsSum[acc].toLocaleString('es-CO', { minimumFractionDigits: 2 })}</td>`;
                     }).join('')}
+                        <td class="amount-cell" style="color: var(--accent); font-size: 1.1rem;">${grandSum.toLocaleString('es-CO', { minimumFractionDigits: 2 })}</td>
                     </tr>`;
 
                     html += `</tbody></table>`;
                 } else {
-                    // SINGLE ACCOUNT VIEW (Original Table)
                     for (const [account, costs] of Object.entries(data)) {
                         html += `<div style="margin-bottom: 1.5rem;">
                             <h4 style="color: var(--accent); margin-bottom: 0.5rem; font-size: 0.9rem;">${account}</h4>
                             <table class="cost-table">
                                 <thead>
                                     <tr>
-                                        <th>Producto</th>
+                                        <th class="checkbox-cell"><input type="checkbox" onchange="const cbs=this.closest('table').querySelectorAll('.product-checkbox'); cbs.forEach(c=>c.checked=this.checked); handleSelectionChange()"></th>
+                                        <th>Producto / Categoria</th>
                                         <th style="text-align: right;">Valor (COP)</th>
                                     </tr>
                                 </thead>
                                 <tbody>`;
 
-                        const sortedItems = Object.entries(costs).sort((a, b) => b[1] - a[1]);
+                        const sortedItems = Object.entries(costs).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
 
                         if (sortedItems.length === 0) {
-                            html += `<tr><td colspan="2" style="text-align: center; color: var(--text-dim);">No se encontraron registros relevantes.</td></tr>`;
+                            html += `<tr><td colspan="3" style="text-align: center; color: var(--text-dim);">No se encontraron registros relevantes.</td></tr>`;
                         } else {
+                            let grandTotal = 0;
                             sortedItems.forEach(([item, amount]) => {
+                                grandTotal += amount;
                                 html += `<tr>
-                                    <td>${item}</td>
+                                    <td class="checkbox-cell"><input type="checkbox" class="product-checkbox" data-product="${item}" onchange="handleSelectionChange()"></td>
+                                    <td><span class="clickable-product" onclick="fetchDetails('${item}')">${item}</span></td>
                                     <td class="amount-cell">${amount.toLocaleString('es-CO', { minimumFractionDigits: 2 })}</td>
                                 </tr>`;
                             });
+                            html += `<tr style="border-top: 2px solid var(--accent); font-weight: bold; background: var(--bg-hover);">
+                                <td colspan="2">TOTAL</td>
+                                <td class="amount-cell">${grandTotal.toLocaleString('es-CO', { minimumFractionDigits: 2 })}</td>
+                            </tr>`;
                         }
-
                         html += `</tbody></table></div>`;
                     }
                 }
                 card.innerHTML = html;
-                div.appendChild(card);
+                win.appendChild(card);
             }
-
-            win.appendChild(div);
             win.scrollTop = win.scrollHeight;
         }
 
-        loadAccounts();
+        window.onload = loadAccounts;
     </script>
 </body>
 
