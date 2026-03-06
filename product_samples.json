@@ -1,0 +1,602 @@
+[
+    {
+        "id": 6119,
+        "name": "4G Router With Rs485",
+        "default_code": "P00001",
+        "list_price": 1.0
+    },
+    {
+        "id": 6962,
+        "name": "51353502 INTERNET - PLANES",
+        "default_code": "P01813",
+        "list_price": 1.0
+    },
+    {
+        "id": 6777,
+        "name": "ALIMENTOS",
+        "default_code": "P01219",
+        "list_price": 1.0
+    },
+    {
+        "id": 6120,
+        "name": "Abrazadera EMT",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6121,
+        "name": "Abrazadera Galvanizada",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6122,
+        "name": "Abrazadera IMC",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6795,
+        "name": "Accesorio Estructura Tipo Tracker 1P",
+        "default_code": "P01282",
+        "list_price": 1.0
+    },
+    {
+        "id": 6856,
+        "name": "Accesorio Estructura Tipo Tracker 2P",
+        "default_code": "P01535",
+        "list_price": 1.0
+    },
+    {
+        "id": 6123,
+        "name": "Accesorios Celular",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6124,
+        "name": "Accesorios De Anclaje",
+        "default_code": "P00027",
+        "list_price": 1.0
+    },
+    {
+        "id": 6125,
+        "name": "Accesorios Varios",
+        "default_code": "P00028",
+        "list_price": 1.0
+    },
+    {
+        "id": 6126,
+        "name": "Access Point",
+        "default_code": "P00029",
+        "list_price": 1.0
+    },
+    {
+        "id": 6127,
+        "name": "Acrílico",
+        "default_code": "P00030",
+        "list_price": 1.0
+    },
+    {
+        "id": 6639,
+        "name": "Acueducto y Alcantarillado",
+        "default_code": "P00031",
+        "list_price": 1.0
+    },
+    {
+        "id": 6882,
+        "name": "Adaptador API 3 1/2\" (M) X API 4 1/2\" (H)",
+        "default_code": "P01536",
+        "list_price": 1.0
+    },
+    {
+        "id": 6128,
+        "name": "Adaptador Campana PVC",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6129,
+        "name": "Adaptador EMT",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6130,
+        "name": "Adaptador Ethernet",
+        "default_code": "P00043",
+        "list_price": 1.0
+    },
+    {
+        "id": 6131,
+        "name": "Adaptador Fibra Optica",
+        "default_code": "P00044",
+        "list_price": 1.0
+    },
+    {
+        "id": 6132,
+        "name": "Adaptador IMC",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6133,
+        "name": "Adaptador PVC",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6134,
+        "name": "Adatador De Corriente",
+        "default_code": "P00055",
+        "list_price": 1.0
+    },
+    {
+        "id": 6135,
+        "name": "Administracion",
+        "default_code": "P00056",
+        "list_price": 1.0
+    },
+    {
+        "id": 6136,
+        "name": "Administracion Del Sistema",
+        "default_code": "P00057",
+        "list_price": 1.0
+    },
+    {
+        "id": 6137,
+        "name": "Adoquines",
+        "default_code": "P00058",
+        "list_price": 1.0
+    },
+    {
+        "id": 6138,
+        "name": "Aerosol",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6684,
+        "name": "Agua Hidratación",
+        "default_code": "P00061",
+        "list_price": 1.0
+    },
+    {
+        "id": 6139,
+        "name": "Aire Acondicionado",
+        "default_code": "P00062",
+        "list_price": 1.0
+    },
+    {
+        "id": 6896,
+        "name": "Aislador Tipo Garra 15 KV (copia)",
+        "default_code": "P01689",
+        "list_price": 0.0
+    },
+    {
+        "id": 6140,
+        "name": "Aislador Tipo Poste Line Post Con Pin Para 13.2 Kv Ansi 57-1.",
+        "default_code": "P00063",
+        "list_price": 0.0
+    },
+    {
+        "id": 6895,
+        "name": "Aislador Tipo Poste Line Post Con Pin Para 13.2 Kv Ansi 57-1. (copia)",
+        "default_code": "P01690",
+        "list_price": 0.0
+    },
+    {
+        "id": 6897,
+        "name": "Aislador Tipo Poste Line Post Con Pin Para 13.2 Kv Ansi 57-1. (copia)",
+        "default_code": "P01691",
+        "list_price": 0.0
+    },
+    {
+        "id": 6765,
+        "name": "Aislador Tipo Poste Line Post Con Pin Para 34.5 Kv Ansi 57-2",
+        "default_code": "P01220",
+        "list_price": 0.0
+    },
+    {
+        "id": 6141,
+        "name": "Alambre",
+        "default_code": "P00064",
+        "list_price": 1.0
+    },
+    {
+        "id": 6142,
+        "name": "Alambron Aluminio Aac 8 Mm 1H",
+        "default_code": "P00065",
+        "list_price": 0.0
+    },
+    {
+        "id": 6143,
+        "name": "Alicate",
+        "default_code": "P00066",
+        "list_price": 1.0
+    },
+    {
+        "id": 6144,
+        "name": "Alimentacion",
+        "default_code": "P00067",
+        "list_price": 1.0
+    },
+    {
+        "id": 6145,
+        "name": "Alimentación Terminal Facial",
+        "default_code": "P00068",
+        "list_price": 1.0
+    },
+    {
+        "id": 6146,
+        "name": "Alojamiento",
+        "default_code": "P00069",
+        "list_price": 1.0
+    },
+    {
+        "id": 6147,
+        "name": "Alquiler",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6931,
+        "name": "Alquiler (Canon Mensual)",
+        "default_code": "P01743",
+        "list_price": 1.0
+    },
+    {
+        "id": 6642,
+        "name": "Alumbrado Público",
+        "default_code": "P00071",
+        "list_price": 1.0
+    },
+    {
+        "id": 6148,
+        "name": "Amarre Plástico",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6149,
+        "name": "Amazon",
+        "default_code": "P00082",
+        "list_price": 1.0
+    },
+    {
+        "id": 6150,
+        "name": "Amortiguador",
+        "default_code": "P00083",
+        "list_price": 1.0
+    },
+    {
+        "id": 6151,
+        "name": "Amperimetro",
+        "default_code": "P00084",
+        "list_price": 1.0
+    },
+    {
+        "id": 6152,
+        "name": "Amplificador De Rf 0.1-2000Mhz Ganancia 30Db Lna",
+        "default_code": "P00085",
+        "list_price": 1.0
+    },
+    {
+        "id": 6153,
+        "name": "Analizador Alto Rendimiento",
+        "default_code": "P00086",
+        "list_price": 1.0
+    },
+    {
+        "id": 6790,
+        "name": "Analizador Alto Rendimiento (Activo Fijo)",
+        "default_code": "P01262",
+        "list_price": 1.0
+    },
+    {
+        "id": 6961,
+        "name": "Analizador Calidad de Energía",
+        "default_code": "P01814",
+        "list_price": 1.0
+    },
+    {
+        "id": 6154,
+        "name": "Antena",
+        "default_code": "P00087",
+        "list_price": 1.0
+    },
+    {
+        "id": 6155,
+        "name": "Api De Facturación Y Nómina Electrónica En La Nube",
+        "default_code": "P00088",
+        "list_price": 1.0
+    },
+    {
+        "id": 6156,
+        "name": "Aprobación Planos",
+        "default_code": "P00089",
+        "list_price": 1.0
+    },
+    {
+        "id": 6157,
+        "name": "Aps Communication Unit Ecu-R",
+        "default_code": "P00090",
+        "list_price": 1.0
+    },
+    {
+        "id": 6158,
+        "name": "Arandela",
+        "default_code": "P00091",
+        "list_price": 1.0
+    },
+    {
+        "id": 6159,
+        "name": "Arena De Revoque",
+        "default_code": "P00092",
+        "list_price": 1.0
+    },
+    {
+        "id": 6160,
+        "name": "Arnes Dielectrico",
+        "default_code": "P00093",
+        "list_price": 1.0
+    },
+    {
+        "id": 6887,
+        "name": "Arrendamiento",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6741,
+        "name": "Asesoría Técnica",
+        "default_code": "P01130",
+        "list_price": 1.0
+    },
+    {
+        "id": 6162,
+        "name": "Asistencia Técnica",
+        "default_code": "P00095",
+        "list_price": 1.0
+    },
+    {
+        "id": 6163,
+        "name": "Autenticacion De Firmas",
+        "default_code": "P00096",
+        "list_price": 1.0
+    },
+    {
+        "id": 6677,
+        "name": "Bandeja Curva Horizontal",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6703,
+        "name": "Bandeja Curva Vertical",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6164,
+        "name": "Bandeja Escalera",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6904,
+        "name": "Bandeja Fija Ventilada",
+        "default_code": "P01697",
+        "list_price": 1.0
+    },
+    {
+        "id": 6646,
+        "name": "Bandeja Malla",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6681,
+        "name": "Bandeja TE",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6770,
+        "name": "Bandeja lisa BL1001",
+        "default_code": "P01221",
+        "list_price": 1.0
+    },
+    {
+        "id": 6165,
+        "name": "Barbuquejo",
+        "default_code": "P00177",
+        "list_price": 1.0
+    },
+    {
+        "id": 6166,
+        "name": "Barraje Para Caja",
+        "default_code": "P00178",
+        "list_price": 1.0
+    },
+    {
+        "id": 6167,
+        "name": "Barraje Tipo Peine",
+        "default_code": "P00179",
+        "list_price": 1.0
+    },
+    {
+        "id": 6168,
+        "name": "Barras De Cobre",
+        "default_code": "P00180",
+        "list_price": 1.0
+    },
+    {
+        "id": 6963,
+        "name": "Base Extintor 20 LB, Blanco Piso",
+        "default_code": "P01815",
+        "list_price": 1.0
+    },
+    {
+        "id": 6169,
+        "name": "Base Pararayo Sencillo Rosca 3/4\"",
+        "default_code": "P00181",
+        "list_price": 0.0
+    },
+    {
+        "id": 6846,
+        "name": "Bata Manga Larga Antifluido",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6960,
+        "name": "Bata Manga Larga Antifluido (copia)",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6170,
+        "name": "Bateria",
+        "default_code": "P00182",
+        "list_price": 1.0
+    },
+    {
+        "id": 6666,
+        "name": "Bebidas",
+        "default_code": "P00183",
+        "list_price": 1.0
+    },
+    {
+        "id": 6171,
+        "name": "Bidevanado Trifásico Seco Sin 110 Kva Vp 480 V Plena Carga 800 V",
+        "default_code": "P00184",
+        "list_price": 1.0
+    },
+    {
+        "id": 6811,
+        "name": "Binoculares",
+        "default_code": "P01283",
+        "list_price": 1.0
+    },
+    {
+        "id": 6172,
+        "name": "Bisagra",
+        "default_code": "P00185",
+        "list_price": 1.0
+    },
+    {
+        "id": 6173,
+        "name": "Bloque De Distribucion Tetra 4L 7 Deriv",
+        "default_code": "P00186",
+        "list_price": 1.0
+    },
+    {
+        "id": 6174,
+        "name": "Bloque De Terminal",
+        "default_code": "P00187",
+        "list_price": 1.0
+    },
+    {
+        "id": 6175,
+        "name": "Bloque Distribucion 4 Polos 7 Conectores 125A/500V",
+        "default_code": "P00188",
+        "list_price": 1.0
+    },
+    {
+        "id": 6775,
+        "name": "Bloque Distribución Tipo Onka 3Líneas/Barraje 7 huecos por barraje 80A 400 V",
+        "default_code": "P01222",
+        "list_price": 1.0
+    },
+    {
+        "id": 6176,
+        "name": "Bloque Macizo",
+        "default_code": "P00189",
+        "list_price": 1.0
+    },
+    {
+        "id": 6177,
+        "name": "Bob Disparo Sht-200-220 Vac/Dc Ts1000-Ts1600 83211176224",
+        "default_code": "P00190",
+        "list_price": 1.0
+    },
+    {
+        "id": 6178,
+        "name": "Bobina 5 Pines 12V 30Amp. Ref.4120",
+        "default_code": "P00191",
+        "list_price": 1.0
+    },
+    {
+        "id": 6179,
+        "name": "Bomba Pearl De 3.0 Hp",
+        "default_code": "P00192",
+        "list_price": 1.0
+    },
+    {
+        "id": 6180,
+        "name": "Bonificación",
+        "default_code": "P00193",
+        "list_price": 1.0
+    },
+    {
+        "id": 6181,
+        "name": "Boquilla",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6182,
+        "name": "Bornera De Prueba Tipo Cuchilla",
+        "default_code": "P00195",
+        "list_price": 1.0
+    },
+    {
+        "id": 6731,
+        "name": "Bornera De Prueba Tipo Puente",
+        "default_code": "P00196",
+        "list_price": 1.0
+    },
+    {
+        "id": 6656,
+        "name": "Bota de Cuero",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6660,
+        "name": "Bota de Cuero (copia)",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6742,
+        "name": "Bota de Cuero Solver",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6744,
+        "name": "Bota de Seguridad",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6743,
+        "name": "Bota de Seguridad Caña Alta",
+        "default_code": false,
+        "list_price": 1.0
+    },
+    {
+        "id": 6183,
+        "name": "Botiquin Tipo A",
+        "default_code": "P00251",
+        "list_price": 1.0
+    },
+    {
+        "id": 6184,
+        "name": "Boton De Salida",
+        "default_code": "P00252",
+        "list_price": 1.0
+    }
+]

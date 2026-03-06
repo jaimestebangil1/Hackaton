@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odoo IA Analytic Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --glass: rgba(30, 41, 59, 0.7);
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            background-image: radial-gradient(circle at 20% 20%, #1e293b 0%, transparent 40%),
+                              radial-gradient(circle at 80% 80%, #0f172a 0%, transparent 40%);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        aside {
+            width: 320px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+
+        .account-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .account-item {
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .account-item:hover {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .account-item.selected {
+            background: var(--accent);
+            color: #000;
+            font-weight: 600;
+        }
+
+        /* Main Chat Area */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #chat-window {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            line-height: 1.5;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--accent);
+            color: #000;
+            font-weight: 500;
+        }
+
+        .input-area {
+            padding: 2rem;
+            background: linear-gradient(transparent, var(--bg));
+        }
+
+        .input-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 0.5rem;
+            display: flex;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 1rem;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        button#send {
+            background: var(--accent);
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem 1.5rem;
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button#send:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* Glass Cards for Data */
+        .data-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+
+    </style>
+</head>
+<body>
+    <aside>
+        <h1>Odoo AI analytic</h1>
+        <div>
+            <p class="section-title">Cuentas Analíticas</p>
+            <div id="account-list" class="account-list">
+                <!-- Loaded via JS -->
+            </div>
+        </div>
+        <div id="stats" style="font-size: 0.8rem; color: var(--text-dim)">
+            Seleccionadas: <span id="selected-count">0</span>
+        </div>
+    </aside>
+
+    <main>
+        <div id="chat-window">
+            <div class="message bot">
+                ¡Hola! Soy tu asistente de análisis de Odoo. Selecciona cuentas analíticas a la izquierda y pregúntame para comparar sus costos normalizados.
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="Pregunta algo sobre los costos..." onkeydown="if(event.key==='Enter') sendMessage()">
+                <button id="send" onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let selectedAccounts = [];
+
+        async function loadAccounts() {
+            const resp = await fetch('/api/accounts');
+            const accounts = await resp.json();
+            const list = document.getElementById('account-list');
+            list.innerHTML = '';
+            accounts.forEach(acc => {
+                const div = document.createElement('div');
+                div.className = 'account-item';
+                div.innerText = acc.name;
+                div.onclick = () => toggleAccount(acc.id, div);
+                list.appendChild(div);
+            });
+        }
+
+        function toggleAccount(id, element) {
+            const idx = selectedAccounts.indexOf(id);
+            if (idx > -1) {
+                selectedAccounts.splice(idx, 1);
+                element.classList.remove('selected');
+            } else {
+                selectedAccounts.push(id);
+                element.classList.add('selected');
+            }
+            document.getElementById('selected-count').innerText = selectedAccounts.length;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            addMessage(msg, 'user');
+            input.value = '';
+
+            const resp = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg, context_accounts: selectedAccounts })
+            });
+
+            const data = await resp.json();
+            addMessage(data.response, 'bot', data.data);
+        }
+
+        function addMessage(text, type, data = null) {
+            const win = document.getElementById('chat-window');
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.innerText = text;
+            
+            if (data) {
+                const card = document.createElement('div');
+                card.className = 'data-card';
+                card.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                div.appendChild(card);
+            }
+
+            win.appendChild(div);
+            win.scrollTop = win.scrollHeight;
+        }
+
+        loadAccounts();
+    </script>
+</body>
+</html>
