@@ -77,31 +77,27 @@ async def chat_interaction(req: ChatRequest):
             filtered_data = {}
 
             # Identify keywords in message to filter products
-            # We use words with more than 3 characters, excluding common command words
-            ignore_words = ["compara", "diferencia", "costo", "cuenta", "sobre", "solo", "solamente", "muéstrame", "muesltra", "trae", "producto", "especifico", "específico"]
-            keywords = [w.lower() for w in msg.split() if len(w) > 3 and w.lower() not in ignore_words]
+            # Strip punctuation and use lowercase
+            import re
+            words = re.findall(r'\b\w{4,}\b', msg.lower())
+            
+            ignore_words = {"compara", "diferencia", "costo", "costos", "cuenta", "sobre", "solo", "solamente", 
+                            "muéstrame", "muesltra", "trae", "producto", "especifico", "específico", 
+                            "totales", "consolidados", "actualizar", "análisis", "todos", "tabla", "ver"}
+            
+            keywords = [w for w in words if w not in ignore_words]
 
             for account, costs in data.items():
                 filtered_account_costs = {}
                 for item, amt in costs.items():
-                    # Strict Filter: item matches any keyword
+                    # If no keywords remain (generic search), include everything
+                    # If keywords exist, strictly filter by finding ANY keyword in the product name
                     if not keywords or any(k in item.lower() for k in keywords):
                         filtered_account_costs[item] = amt
                         all_items_summary[item] = all_items_summary.get(item, 0) + abs(amt)
                 
-                # If keywords were provided and we found nothing, we don't fallback to top 5 
-                # if the user was being specific. Only fallback if no keywords at all.
-                if not keywords and not filtered_account_costs:
-                     top_items = sorted(costs.items(), key=lambda x: abs(x[1]), reverse=True)[:5]
-                     filtered_account_costs = dict(top_items)
-                     for item, amt in filtered_account_costs.items():
-                         all_items_summary[item] = all_items_summary.get(item, 0) + abs(amt)
-
-                filtered_total = sum(filtered_account_costs.values())
-                if filtered_account_costs:
-                    summary_parts.append(f"- **{account}**: Total filtrado {filtered_total:,.2f} COP")
-
                 filtered_data[account] = filtered_account_costs
+                summary_parts.append(f"- **{account}**: {len(filtered_account_costs)} productos analizados")
             
             response += "\n".join(summary_parts) + "\n\n"
             
