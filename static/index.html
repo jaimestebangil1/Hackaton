@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Odoo IA Analytic Assistant</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg: #0f172a;
@@ -28,7 +31,7 @@
             font-family: 'Inter', sans-serif;
             background: var(--bg);
             background-image: radial-gradient(circle at 20% 20%, #1e293b 0%, transparent 40%),
-                              radial-gradient(circle at 80% 80%, #0f172a 0%, transparent 40%);
+                radial-gradient(circle at 80% 80%, #0f172a 0%, transparent 40%);
             color: var(--text);
             height: 100vh;
             display: flex;
@@ -64,6 +67,28 @@
             letter-spacing: 0.1em;
             color: var(--text-dim);
             margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-container {
+            margin-bottom: 1rem;
+        }
+
+        input.search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem;
+            color: #fff;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        input.search-input:focus {
+            border-color: var(--accent);
         }
 
         .account-list {
@@ -72,6 +97,21 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        /* Custom Scrollbar */
+        .account-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .account-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        .account-list::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
         }
 
         .account-item {
@@ -121,15 +161,22 @@
         }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .message.bot {
             align-self: flex-start;
             background: var(--glass);
             border: 1px solid var(--border);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .message.user {
@@ -153,7 +200,7 @@
             border-radius: 16px;
             padding: 0.5rem;
             display: flex;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         input {
@@ -188,25 +235,67 @@
             border-radius: 12px;
             padding: 1rem;
             margin-top: 1rem;
-            font-family: monospace;
             font-size: 0.85rem;
             color: var(--accent);
+            overflow-x: auto;
         }
 
-        pre { white-space: pre-wrap; word-wrap: break-word; }
+        .cost-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
 
+        .cost-table th {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .cost-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text);
+        }
+
+        .cost-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .amount-cell {
+            text-align: right;
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+        }
     </style>
 </head>
+
 <body>
     <aside>
         <h1>Odoo AI analytic</h1>
-        <div>
-            <p class="section-title">Cuentas Analíticas</p>
+        <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+            <p class="section-title">
+                Cuentas Analíticas
+            </p>
+            <div class="search-container">
+                <input type="text" id="account-search" class="search-input" placeholder="Buscar cuenta..."
+                    oninput="filterAccounts()">
+            </div>
             <div id="account-list" class="account-list">
                 <!-- Loaded via JS -->
             </div>
         </div>
-        <div id="stats" style="font-size: 0.8rem; color: var(--text-dim)">
+        <div id="stats"
+            style="font-size: 0.8rem; color: var(--text-dim); padding-top: 1rem; border-top: 1px solid var(--border);">
             Seleccionadas: <span id="selected-count">0</span>
         </div>
     </aside>
@@ -214,33 +303,50 @@
     <main>
         <div id="chat-window">
             <div class="message bot">
-                ¡Hola! Soy tu asistente de análisis de Odoo. Selecciona cuentas analíticas a la izquierda y pregúntame para comparar sus costos normalizados.
+                ¡Hola! Soy tu asistente de análisis de Odoo. Selecciona cuentas analíticas a la izquierda y pregúntame
+                para comparar sus costos normalizados.
             </div>
         </div>
 
         <div class="input-area">
             <div class="input-container">
-                <input type="text" id="user-input" placeholder="Pregunta algo sobre los costos..." onkeydown="if(event.key==='Enter') sendMessage()">
+                <input type="text" id="user-input" placeholder="Pregunta algo sobre los costos..."
+                    onkeydown="if(event.key==='Enter') sendMessage()">
                 <button id="send" onclick="sendMessage()">Enviar</button>
             </div>
         </div>
     </main>
 
     <script>
+        let allAccounts = [];
         let selectedAccounts = [];
 
         async function loadAccounts() {
-            const resp = await fetch('/api/accounts');
-            const accounts = await resp.json();
+            try {
+                const resp = await fetch('/api/accounts');
+                allAccounts = await resp.json();
+                renderAccounts(allAccounts);
+            } catch (e) {
+                console.error("Error loading accounts", e);
+            }
+        }
+
+        function renderAccounts(accounts) {
             const list = document.getElementById('account-list');
             list.innerHTML = '';
             accounts.forEach(acc => {
                 const div = document.createElement('div');
-                div.className = 'account-item';
+                div.className = 'account-item' + (selectedAccounts.includes(acc.id) ? ' selected' : '');
                 div.innerText = acc.name;
                 div.onclick = () => toggleAccount(acc.id, div);
                 list.appendChild(div);
             });
+        }
+
+        function filterAccounts() {
+            const term = document.getElementById('account-search').value.toLowerCase();
+            const filtered = allAccounts.filter(a => a.name.toLowerCase().includes(term));
+            renderAccounts(filtered);
         }
 
         function toggleAccount(id, element) {
@@ -263,14 +369,23 @@
             addMessage(msg, 'user');
             input.value = '';
 
-            const resp = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg, context_accounts: selectedAccounts })
-            });
+            try {
+                const resp = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg, context_accounts: selectedAccounts })
+                });
 
-            const data = await resp.json();
-            addMessage(data.response, 'bot', data.data);
+                if (!resp.ok) {
+                    throw new Error(`Error en el servidor: ${resp.status}`);
+                }
+
+                const data = await resp.json();
+                addMessage(data.response || "No recibí una respuesta clara del servidor.", 'bot', data.data);
+            } catch (error) {
+                console.error(error);
+                addMessage(`Error: ${error.message}`, 'bot');
+            }
         }
 
         function addMessage(text, type, data = null) {
@@ -278,11 +393,87 @@
             const div = document.createElement('div');
             div.className = `message ${type}`;
             div.innerText = text;
-            
-            if (data) {
+
+            if (data && typeof data === 'object' && Object.keys(data).length > 0) {
                 const card = document.createElement('div');
                 card.className = 'data-card';
-                card.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+                const accounts = Object.keys(data);
+                let html = '';
+
+                if (accounts.length > 1) {
+                    // COMPARATIVE MATRIX VIEW
+                    const allProductsSet = new Set();
+                    accounts.forEach(acc => Object.keys(data[acc]).forEach(p => allProductsSet.add(p)));
+                    const allProducts = Array.from(allProductsSet);
+
+                    // Sort products by total cost across all selected accounts
+                    allProducts.sort((a, b) => {
+                        const totalA = accounts.reduce((sum, acc) => sum + (data[acc][a] || 0), 0);
+                        const totalB = accounts.reduce((sum, acc) => sum + (data[acc][b] || 0), 0);
+                        return totalB - totalA;
+                    });
+
+                    html += `<table class="cost-table">
+                        <thead>
+                            <tr>
+                                <th>Producto / Entidad</th>
+                                ${accounts.map(acc => `<th style="text-align: right;">${acc}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                    allProducts.forEach(prod => {
+                        html += `<tr>
+                            <td>${prod}</td>
+                            ${accounts.map(acc => {
+                            const val = data[acc][prod] || 0;
+                            return `<td class="amount-cell">${val !== 0 ? val.toLocaleString('es-CO', { minimumFractionDigits: 2 }) : '-'}</td>`;
+                        }).join('')}
+                        </tr>`;
+                    });
+
+                    // Add Total Row
+                    html += `<tr style="border-top: 2px solid var(--accent); font-weight: bold; background: rgba(0,255,170,0.05);">
+                        <td>TOTAL GENERAL</td>
+                        ${accounts.map(acc => {
+                        const total = Object.values(data[acc]).reduce((a, b) => a + b, 0);
+                        return `<td class="amount-cell">${total.toLocaleString('es-CO', { minimumFractionDigits: 2 })}</td>`;
+                    }).join('')}
+                    </tr>`;
+
+                    html += `</tbody></table>`;
+                } else {
+                    // SINGLE ACCOUNT VIEW (Original Table)
+                    for (const [account, costs] of Object.entries(data)) {
+                        html += `<div style="margin-bottom: 1.5rem;">
+                            <h4 style="color: var(--accent); margin-bottom: 0.5rem; font-size: 0.9rem;">${account}</h4>
+                            <table class="cost-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th style="text-align: right;">Valor (COP)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                        const sortedItems = Object.entries(costs).sort((a, b) => b[1] - a[1]);
+
+                        if (sortedItems.length === 0) {
+                            html += `<tr><td colspan="2" style="text-align: center; color: var(--text-dim);">No se encontraron registros relevantes.</td></tr>`;
+                        } else {
+                            sortedItems.forEach(([item, amount]) => {
+                                html += `<tr>
+                                    <td>${item}</td>
+                                    <td class="amount-cell">${amount.toLocaleString('es-CO', { minimumFractionDigits: 2 })}</td>
+                                </tr>`;
+                            });
+                        }
+
+                        html += `</tbody></table></div>`;
+                    }
+                }
+                card.innerHTML = html;
                 div.appendChild(card);
             }
 
@@ -293,4 +484,5 @@
         loadAccounts();
     </script>
 </body>
+
 </html>

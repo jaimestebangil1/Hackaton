@@ -27,42 +27,56 @@ class BusinessLogic:
         
         return odoo_client.execute_kw(
             'account.analytic.line', 'search_read',
-            domain, {'fields': ['id', 'name', 'account_id', 'product_id', 'amount', 'unit_amount', 'date']}
+            [domain], # Must be a list of positional args, where the first is the domain list
+            {'fields': ['id', 'name', 'account_id', 'product_id', 'amount', 'unit_amount', 'date']}
         )
 
-    def cluster_products(self, threshold: int = 85):
+    def cluster_products(self, threshold: int = 80):
         """
         Group similar products based on their names.
-        This is the 'CLEANING' part of the challenge.
+        Improved to handle 'panel solar' and similar equipment variations.
         """
         products = self.get_all_products()
-        names = [p['name'] for p in products]
-        id_to_name = {p['id']: p['name'] for p in products}
-        
+        # Pre-process names for better matching
+        processed_products = []
+        for p in products:
+            processed_name = p['name'].lower().strip()
+            # Remove common prefixes like [P0001]
+            if processed_name.startswith('['):
+                parts = processed_name.split(']', 1)
+                if len(parts) > 1:
+                    processed_name = parts[1].strip()
+            processed_products.append({'id': p['id'], 'name': p['name'], 'p_name': processed_name})
+
         clusters = []
         visited = set()
 
-        for p in products:
+        for p in processed_products:
             if p['id'] in visited:
                 continue
             
-            # Simple clustering: find all products similar to this one
-            current_name = p['name']
+            current_p_name = p['p_name']
             cluster = [p['id']]
             visited.add(p['id'])
             
-            # Find matches in remaining names
-            for other in products:
+            for other in processed_products:
                 if other['id'] in visited:
                     continue
                 
-                score = fuzz.token_sort_ratio(current_name, other['name'])
-                if score >= threshold:
+                # Check for direct inclusion for important keywords
+                is_manual_match = False
+                if 'panel' in current_p_name and 'panel' in other['p_name']:
+                    # If both have 'panel' and 'solar', higher chance of matching
+                    if 'solar' in current_p_name and 'solar' in other['p_name']:
+                        is_manual_match = True
+                
+                score = fuzz.token_sort_ratio(current_p_name, other['p_name'])
+                if score >= threshold or is_manual_match:
                     cluster.append(other['id'])
                     visited.add(other['id'])
             
             clusters.append({
-                'canonical_name': current_name,
+                'canonical_name': p['name'], # Keep original for display
                 'product_ids': cluster
             })
 
@@ -88,19 +102,24 @@ class BusinessLogic:
         comparison = {}
         
         for line in lines:
-            account_id, account_name = line['account_id']
-            # line['product_id'] is [id, name]
-            p_id = line['product_id'][0] if line['product_id'] else None
-            
-            if not p_id:
+            # line['account_id'] can be [id, name] or False
+            if not line.get('account_id'):
                 continue
                 
-            logical_id = self.canonical_map.get(p_id)
-            if logical_id is None:
-                # If product wasn't in template scan, skip or handle as its own
-                logical_name = line['product_id'][1]
+            account_id, account_name = line['account_id']
+            # line['product_id'] is [id, name] or False
+            p_id = line['product_id'][0] if line.get('product_id') else None
+            
+            if not p_id:
+                # Use a generic name for costs without a specific product
+                logical_name = "Otros / Gastos Generales"
             else:
-                logical_name = self.logical_entities[logical_id]['canonical_name']
+                logical_id = self.canonical_map.get(p_id)
+                if logical_id is None:
+                    # If product wasn't in template scan, use its display name from the line
+                    logical_name = line['product_id'][1]
+                else:
+                    logical_name = self.logical_entities[logical_id]['canonical_name']
 
             if account_name not in comparison:
                 comparison[account_name] = {}
@@ -108,7 +127,7 @@ class BusinessLogic:
             if logical_name not in comparison[account_name]:
                 comparison[account_name][logical_name] = 0
             
-            comparison[account_name][logical_name] += line['amount']
+            comparison[account_name][logical_name] += (line.get('amount') or 0)
 
         return comparison
 

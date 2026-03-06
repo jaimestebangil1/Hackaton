@@ -1,4 +1,4 @@
-import os
+import logging
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -6,6 +6,10 @@ from pydantic import BaseModel
 from typing import List, Dict, Any
 from core.logic import logic
 from core.odoo import odoo_client
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Odoo-IA-Analytic-Assistant")
 
@@ -44,33 +48,66 @@ async def chat_interaction(req: ChatRequest):
     """
     Simulated AI assistant. It analyzes the comparative data to answer questions.
     """
-    if not req.context_accounts:
-        return {"response": "Por favor, selecciona al menos una cuenta analítica para analizar."}
-    
-    data = logic.compare_costs(req.context_accounts)
-    
-    # Simple logic-based "AI" response
-    # In a real scenario, this would go to an LLM with the 'data' as context.
-    response = ""
-    if "compara" in req.message.lower() or "diferencia" in req.message.lower():
-        response = "Analizando la comparativa de costos...\n\n"
-        for account, costs in data.items():
-            total = sum(costs.values())
-            response += f"- **{account}**: Total acumulado de {total:,.2f} COP.\n"
+    try:
+        if not req.context_accounts:
+            return {"response": "Por favor, selecciona al menos una cuenta analítica a la izquierda para poder analizar los costos."}
         
-        # Find the most expensive common item
-        items = {}
-        for account, costs in data.items():
-            for item, amt in costs.items():
-                if item not in items: items[item] = 0
-                items[item] += abs(amt)
+        data = logic.compare_costs(req.context_accounts)
         
-        top_item = max(items, key=items.get) if items else "N/A"
-        response += f"\nEl costo más significativo detectado es **{top_item}**."
-    else:
-        response = "¿En qué puedo ayudarte con el análisis de costos? Puedo comparar cuentas analíticas y detectar desviaciones en productos normalizados."
+        msg = req.message.lower()
+        response = ""
+        
+        # Keywords for analysis
+        if any(k in msg for k in ["compara", "diferencia", "costo", "más", "alto", "mayor"]):
+            response = "He analizado los costos de las cuentas seleccionadas. Aquí tienes los hallazgos:\n\n"
+            
+            summary_parts = []
+            all_items_summary = {}
+            filtered_data = {}
 
-    return {"response": response, "data": data}
+            # Identify keywords in message to filter products
+            # We use words with more than 3 characters
+            keywords = [w for w in msg.split() if len(w) > 3 and w not in ["compara", "diferencia", "costo", "cuenta"]]
+
+            for account, costs in data.items():
+                total = sum(costs.values())
+                summary_parts.append(f"- **{account}**: Total de {total:,.2f} COP")
+                
+                filtered_account_costs = {}
+                for item, amt in costs.items():
+                    # Filter: if empty keywords or item matches any keyword
+                    if not keywords or any(k in item.lower() for k in keywords):
+                        filtered_account_costs[item] = amt
+                    
+                    all_items_summary[item] = all_items_summary.get(item, 0) + abs(amt)
+                
+                # If everything was filtered out, maybe show the top 5 for context
+                if keywords and not filtered_account_costs:
+                     # Sort by absolute amount descending
+                     top_items = sorted(costs.items(), key=lambda x: abs(x[1]), reverse=True)[:5]
+                     filtered_account_costs = dict(top_items)
+
+                filtered_data[account] = filtered_account_costs
+            
+            response += "\n".join(summary_parts) + "\n\n"
+            
+            if all_items_summary:
+                top_item = max(all_items_summary, key=lambda k: all_items_summary[k])
+                response += f"El componente con **mayor impacto económico** es **{top_item}**.\n"
+                if keywords:
+                    response += f"\n*Nota: Los datos mostrados abajo están filtrados por términos relacionados a tu consulta.*"
+            else:
+                response += "No se detectaron costos significativos en estas cuentas.\n"
+                
+            return {"response": response, "data": filtered_data}
+        else:
+            response = "¿En qué puedo ayudarte con el análisis de costos? Prueba preguntando: '¿Cuál es la diferencia de costos entre los proyectos?' o '¿Qué productos tienen más costo?'"
+            # If no specific keywords for analysis, return original data or a default view
+            # For now, let's return the original data if no specific filter was applied
+            return {"response": response, "data": data}
+    except Exception as e:
+        logger.error(f"Error in chat: {e}")
+        return {"response": f"Lo siento, ocurrió un error interno al procesar tu consulta: {str(e)}", "data": {}}
 
 @app.get("/app", response_class=HTMLResponse)
 async def get_app():
