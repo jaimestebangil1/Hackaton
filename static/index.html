@@ -114,6 +114,41 @@
             background: var(--accent);
         }
 
+        .btn-update {
+            width: 100%;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 0.8rem;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-update:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 170, 0.4);
+        }
+
+        .btn-update:active {
+            transform: translateY(0);
+        }
+
+        .btn-update:disabled {
+            background: var(--border);
+            color: var(--text-dim);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .account-item {
             padding: 0.75rem;
             background: rgba(255, 255, 255, 0.05);
@@ -294,9 +329,14 @@
                 <!-- Loaded via JS -->
             </div>
         </div>
-        <div id="stats"
-            style="font-size: 0.8rem; color: var(--text-dim); padding-top: 1rem; border-top: 1px solid var(--border);">
-            Seleccionadas: <span id="selected-count">0</span>
+        <div style="padding-top: 1rem; border-top: 1px solid var(--border);">
+            <div id="stats"
+                style="font-size: 0.8rem; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <span>Seleccionadas: <span id="selected-count">0</span></span>
+            </div>
+            <button id="btn-update" class="btn-update" onclick="updateComparison()" disabled>
+                <span>🔄</span> Actualizar Comparativa
+            </button>
         </div>
     </aside>
 
@@ -358,7 +398,34 @@
                 selectedAccounts.push(id);
                 element.classList.add('selected');
             }
-            document.getElementById('selected-count').innerText = selectedAccounts.length;
+            const count = selectedAccounts.length;
+            document.getElementById('selected-count').innerText = count;
+            document.getElementById('btn-update').disabled = count === 0;
+        }
+
+        async function updateComparison() {
+            if (selectedAccounts.length === 0) return;
+
+            addMessage("Actualizando análisis comparativo...", 'user');
+
+            try {
+                const resp = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: "Compara los costos totales y consolidados",
+                        context_accounts: selectedAccounts
+                    })
+                });
+
+                if (!resp.ok) throw new Error(`Error: ${resp.status}`);
+
+                const data = await resp.json();
+                addMessage(data.response, 'bot', data.data);
+            } catch (error) {
+                console.error(error);
+                addMessage(`Error al actualizar: ${error.message}`, 'bot');
+            }
         }
 
         async function sendMessage() {

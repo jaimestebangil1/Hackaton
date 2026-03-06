@@ -12,11 +12,11 @@ class BusinessLogic:
         self.canonical_map = {} # productId -> logicalId
         self.logical_entities = {} # logicalId -> {name, productIds}
 
-    def get_all_products(self) -> List[Dict[str, Any]]:
+    def get_all_products(self, limit: int = 2000) -> List[Dict[str, Any]]:
         """Fetch all products from Odoo."""
         return odoo_client.execute_kw(
             'product.template', 'search_read',
-            [[]], {'fields': ['id', 'name', 'default_code']}
+            [[]], {'fields': ['id', 'name', 'default_code'], 'limit': limit}
         )
 
     def get_analytic_lines(self, account_ids: List[int] = None) -> List[Dict[str, Any]]:
@@ -31,26 +31,65 @@ class BusinessLogic:
             {'fields': ['id', 'name', 'account_id', 'product_id', 'amount', 'unit_amount', 'date']}
         )
 
+    def get_category_manual(self, name: str) -> str:
+        """Categorize a name based on manual rules."""
+        RULES = {
+            'Paneles': ['panel', 'modulo', 'módulo', 'monocristalino', 'policristalino'],
+            'Inversores': ['inversor', 'inverter'],
+            'Cables': ['cable', 'solar dc', 'solar ac', 'conductor', 'awg'],
+            'Estructura': ['estructura', 'perfil', 'soporte', 'riel', 'clamp'],
+            'Protecciones': ['breaker', 'fusible', 'dps', 'proteccion', 'protección', 'tablero', 'terminal'],
+            'Transformadores': ['transformador', 'trafo'],
+            'Medición': ['medidor', 'analizador', 'meter']
+        }
+        name_lower = name.lower()
+        for cat, keywords in RULES.items():
+            if any(k in name_lower for k in keywords):
+                return cat
+        return None
+
     def cluster_products(self, threshold: int = 80):
         """
         Group similar products based on their names.
-        Improved to handle 'panel solar' and similar equipment variations.
+        Aggressively consolidates key solar equipment into broad categories.
         """
+        self.logical_entities = {}
+        self.canonical_map = {}
+        
         products = self.get_all_products()
-        # Pre-process names for better matching
+        
+        # Pre-process names and categorize
         processed_products = []
         for p in products:
             processed_name = p['name'].lower().strip()
-            # Remove common prefixes like [P0001]
             if processed_name.startswith('['):
                 parts = processed_name.split(']', 1)
                 if len(parts) > 1:
                     processed_name = parts[1].strip()
-            processed_products.append({'id': p['id'], 'name': p['name'], 'p_name': processed_name})
+            
+            category = self.get_category_manual(processed_name)
+            processed_products.append({
+                'id': p['id'], 
+                'name': p['name'], 
+                'p_name': processed_name,
+                'category': category
+            })
 
         clusters = []
         visited = set()
 
+        # Step 1: Cluster by Category
+        categories = ['Paneles', 'Inversores', 'Cables', 'Estructura', 'Protecciones', 'Transformadores', 'Medición']
+        for cat in categories:
+            cat_ids = [p['id'] for p in processed_products if p['category'] == cat]
+            if cat_ids:
+                clusters.append({
+                    'canonical_name': cat,
+                    'product_ids': cat_ids
+                })
+                visited.update(cat_ids)
+
+        # Step 2: Cluster remaining products by Fuzzy matching
         for p in processed_products:
             if p['id'] in visited:
                 continue
@@ -63,30 +102,26 @@ class BusinessLogic:
                 if other['id'] in visited:
                     continue
                 
-                # Check for direct inclusion for important keywords
-                is_manual_match = False
-                if 'panel' in current_p_name and 'panel' in other['p_name']:
-                    # If both have 'panel' and 'solar', higher chance of matching
-                    if 'solar' in current_p_name and 'solar' in other['p_name']:
-                        is_manual_match = True
-                
                 score = fuzz.token_sort_ratio(current_p_name, other['p_name'])
-                if score >= threshold or is_manual_match:
+                if score >= threshold:
                     cluster.append(other['id'])
                     visited.add(other['id'])
             
             clusters.append({
-                'canonical_name': p['name'], # Keep original for display
+                'canonical_name': p['name'],
                 'product_ids': cluster
             })
 
-        # Build mapping for later use
-        self.logical_entities = {i: c for i, c in enumerate(clusters)}
-        self.canonical_map = {}
-        for logical_id, cluster in self.logical_entities.items():
-            for product_id in cluster['product_ids']:
-                self.canonical_map[product_id] = logical_id
-        
+        # Step 3: Populate Maps
+        for i, cluster_data in enumerate(clusters):
+            logical_id = i
+            self.logical_entities[logical_id] = {
+                'canonical_name': cluster_data['canonical_name'],
+                'product_ids': cluster_data['product_ids']
+            }
+            for p_id in cluster_data['product_ids']:
+                self.canonical_map[p_id] = logical_id
+
         return self.logical_entities
 
     def compare_costs(self, account_ids: List[int]):
@@ -97,27 +132,24 @@ class BusinessLogic:
             self.cluster_products()
 
         lines = self.get_analytic_lines(account_ids)
-        
-        # Result structure: { account_name: { logical_name: total_amount } }
         comparison = {}
         
         for line in lines:
-            # line['account_id'] can be [id, name] or False
             if not line.get('account_id'):
                 continue
                 
             account_id, account_name = line['account_id']
-            # line['product_id'] is [id, name] or False
             p_id = line['product_id'][0] if line.get('product_id') else None
             
             if not p_id:
-                # Use a generic name for costs without a specific product
                 logical_name = "Otros / Gastos Generales"
             else:
                 logical_id = self.canonical_map.get(p_id)
                 if logical_id is None:
-                    # If product wasn't in template scan, use its display name from the line
-                    logical_name = line['product_id'][1]
+                    # Fallback: Try manual categorization
+                    display_name = line['product_id'][1]
+                    cat = self.get_category_manual(display_name)
+                    logical_name = cat if cat else display_name
                 else:
                     logical_name = self.logical_entities[logical_id]['canonical_name']
 
